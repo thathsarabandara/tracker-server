@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Pulse</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      color: #334155;
+    }
+    .email-wrapper {
+      max-width: 580px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .email-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      padding: 36px 40px;
+      text-align: center;
+    }
+    .brand-logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+    .brand-logo span {
+      color: #6366f1;
+    }
+    .email-body {
+      padding: 40px;
+    }
+    .greeting {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    .text-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #475569;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .btn-action {
+      display: inline-block;
+      background: #6366f1;
+      color: #ffffff !important;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+      transition: background-color 0.2s;
+    }
+    .btn-container {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .email-footer {
+      background-color: #f8fafc;
+      padding: 24px 40px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="email-header">
+      <div class="brand-logo">PULSE<span>.</span></div>
+    </div>
+    <div class="email-body">
+      <div class="badge">Welcome Onboard</div>
+      <h1 class="greeting">Welcome to Pulse, {{ user_name or 'Friend' }}!</h1>
+      <p class="text-content">We are thrilled to have you join <strong>Pulse</strong> — your high-performance platform for real-time tracking, project management, and analytics.</p>
+      <p class="text-content">Your account is ready to go. Explore your personalized dashboard and streamline your workflow today.</p>
+      
+      <div class="btn-container">
+        <a href="{{ dashboard_url or 'https://pulse.io/dashboard' }}" class="btn-action">Go to Dashboard &rarr;</a>
+      </div>
+
+      <p class="text-content">If you have any questions or need assistance getting started, our team is always here to help.</p>
+    </div>
+    <div class="email-footer">
+      <p>&copy; {{ current_year or 2026 }} Pulse Platform Inc. All rights reserved.</p>
+      <p>Sent by <strong>Pulse</strong> &lt;noreply@pulse.io&gt;</p>
+    </div>
+  </div>
+</body>
+</html>
