@@ -78,7 +78,7 @@ class LearningSubtopicDTO(BaseModel):
     estMinutes: int = Field(30, validation_alias=AliasChoices('estMinutes', 'est_minutes'))
     completed: bool = False
     displayOrder: int = Field(0, validation_alias=AliasChoices('displayOrder', 'display_order'))
-    checklist: List[SubtopicChecklistItemDTO] = []
+    checklist: List[SubtopicChecklistItemDTO] = Field([], validation_alias=AliasChoices('checklist', 'checklist_items'))
 
     class Config:
         from_attributes = True
@@ -117,7 +117,7 @@ class LearningTopicSummaryDTO(BaseModel):
 
 class LearningTopicDetailDTO(LearningTopicSummaryDTO):
     subtopics: List[LearningSubtopicDTO] = []
-    sessionLogs: List[LearningSessionLogDTO] = []
+    sessionLogs: List[LearningSessionLogDTO] = Field([], validation_alias=AliasChoices('sessionLogs', 'session_logs'))
 
     class Config:
         from_attributes = True

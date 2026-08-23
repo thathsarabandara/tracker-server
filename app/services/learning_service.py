@@ -118,7 +118,18 @@ class LearningService:
 
                 if sub_req.checklist:
                     for c_idx, chk_item in enumerate(sub_req.checklist):
-                        chk_title = chk_item if isinstance(chk_item, str) else chk_item.title
+                        if isinstance(chk_item, str):
+                            chk_title = chk_item
+                        elif isinstance(chk_item, dict):
+                            chk_title = chk_item.get("title", "")
+                        elif hasattr(chk_item, "title"):
+                            chk_title = chk_item.title
+                        else:
+                            chk_title = str(chk_item)
+
+                        if not chk_title:
+                            continue
+
                         checklist_record = SubtopicChecklistItem(
                             subtopic_id=subtopic.id,
                             title=chk_title,
