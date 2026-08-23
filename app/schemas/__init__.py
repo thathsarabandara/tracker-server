@@ -21,6 +21,21 @@ from app.schemas.item_schemas import (
     ItemResponse
 )
 
+from app.schemas.learning_schemas import (
+    CreateRoadmapRequest,
+    UpdateRoadmapRequest,
+    RawJsonPayloadRequest,
+    UpdateSubtopicRequest,
+    CreateChecklistItemRequest,
+    UpdateChecklistItemRequest,
+    CreateSessionLogRequest,
+    LearningTopicSummaryDTO,
+    LearningTopicDetailDTO,
+    LearningSubtopicDTO,
+    SubtopicChecklistItemDTO,
+    LearningSessionLogDTO
+)
+
 __all__ = [
     "RegisterRequest",
     "VerifyOtpRequest",
@@ -39,5 +54,17 @@ __all__ = [
     "ItemBase",
     "ItemCreate",
     "ItemUpdate",
-    "ItemResponse"
+    "ItemResponse",
+    "CreateRoadmapRequest",
+    "UpdateRoadmapRequest",
+    "RawJsonPayloadRequest",
+    "UpdateSubtopicRequest",
+    "CreateChecklistItemRequest",
+    "UpdateChecklistItemRequest",
+    "CreateSessionLogRequest",
+    "LearningTopicSummaryDTO",
+    "LearningTopicDetailDTO",
+    "LearningSubtopicDTO",
+    "SubtopicChecklistItemDTO",
+    "LearningSessionLogDTO"
 ]
