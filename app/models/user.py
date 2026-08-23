@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 from sqlalchemy import Boolean, Column, DateTime, String, Text
 from sqlalchemy.orm import relationship
 from app.config.database import Base
+
 
 
 def generate_uuid() -> str:
@@ -37,3 +39,20 @@ class User(Base):
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     user_sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     two_factor_recovery_codes = relationship("TwoFactorRecoveryCode", back_populates="user", cascade="all, delete-orphan")
+
+    @property
+    def avatarUrl(self) -> Optional[str]:
+        return self.avatar_url
+
+    @property
+    def jobTitle(self) -> Optional[str]:
+        return self.job_title
+
+    @property
+    def emailVerified(self) -> bool:
+        return self.is_email_verified or False
+
+    @property
+    def is2faEnabled(self) -> bool:
+        return self.is_2fa_enabled or False
+
