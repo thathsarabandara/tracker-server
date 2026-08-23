@@ -25,7 +25,6 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True, index=True)
     password_hash = Column(String(255), nullable=False)
     avatar_url = Column(Text, nullable=True)
-    tier = Column(String(50), default="Pro Architect")
     job_title = Column(String(150), nullable=True)
     bio = Column(Text, nullable=True)
     is_email_verified = Column(Boolean, default=False)
