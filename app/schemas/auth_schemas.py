@@ -47,7 +47,6 @@ class UpdateProfileRequest(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=100)
     jobTitle: Optional[str] = Field(None, max_length=150)
     bio: Optional[str] = Field(None, max_length=1000)
-    tier: Optional[str] = Field(None, max_length=50)
 
 
 class UpdateAvatarUrlRequest(BaseModel):
@@ -80,7 +79,6 @@ class UserDTO(BaseModel):
     name: str
     email: str
     avatarUrl: Optional[str] = Field(None, validation_alias=AliasChoices('avatarUrl', 'avatar_url'))
-    tier: str = "Pro Architect"
     jobTitle: Optional[str] = Field(None, validation_alias=AliasChoices('jobTitle', 'job_title'))
     bio: Optional[str] = None
     emailVerified: bool = Field(False, validation_alias=AliasChoices('emailVerified', 'is_email_verified'))
