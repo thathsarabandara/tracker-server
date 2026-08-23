@@ -120,9 +120,9 @@ async def reset_password(request_data: ResetPasswordRequest, db: Session = Depen
 
     await user_service.reset_password(
         db=db,
-        email=request_data.email,
         otp=request_data.otp,
-        new_password=request_data.newPassword
+        new_password=request_data.newPassword,
+        email=request_data.email
     )
     return success_response(
         data=None,
