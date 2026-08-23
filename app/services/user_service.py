@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.models import OtpVerification, RefreshToken, TwoFactorRecoveryCode, User, UserSession
 from app.services.email_service import email_service
 from app.services.storage_service import storage_service
@@ -355,7 +356,7 @@ class UserService:
         db.add(otp_record)
         db.commit()
 
-        reset_url = f"{settings.FRONTEND_URL}/reset-password?otp={otp_code}"
+        reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?otp={otp_code}&email={email}"
         await email_service.send_password_reset_email(
             to_email=email,
             user_name=user.name,
@@ -369,14 +370,17 @@ class UserService:
             "otpExpiresInSeconds": 600
         }
 
-    async def reset_password(self, db: Session, email: str, otp: str, new_password: str):
+    async def reset_password(self, db: Session, otp: str, new_password: str, email: Optional[str] = None):
         """Reset password using verified OTP code."""
-        otp_record = db.query(OtpVerification).filter(
-            OtpVerification.email == email,
+        query = db.query(OtpVerification).filter(
             OtpVerification.code == otp,
             OtpVerification.purpose == "password_reset",
             OtpVerification.is_used == False
-        ).order_by(OtpVerification.created_at.desc()).first()
+        )
+        if email:
+            query = query.filter(OtpVerification.email == email)
+
+        otp_record = query.order_by(OtpVerification.created_at.desc()).first()
 
         if not otp_record:
             raise HTTPException(
@@ -385,7 +389,7 @@ class UserService:
             )
 
         otp_record.is_used = True
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(User).filter(User.id == otp_record.user_id).first() or db.query(User).filter(User.email == otp_record.email).first()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -417,16 +421,31 @@ class UserService:
         return user
 
     def update_avatar(self, db: Session, user: User, file_bytes: bytes, filename: str, content_type: str) -> str:
-        """Upload user profile picture avatar to Cloudflare R2 avatars/ folder and update User model."""
-        avatar_url = storage_service.upload_avatar(
-            file_bytes=file_bytes,
-            original_filename=filename,
-            content_type=content_type,
-            user_id=user.id
-        )
+        """Upload user profile picture image to Cloudflare R2 avatars/ folder with resilient fallback handling."""
+        import base64
+        avatar_url = None
+        if storage_service.is_configured():
+            try:
+                avatar_url = storage_service.upload_avatar(
+                    file_bytes=file_bytes,
+                    original_filename=filename,
+                    content_type=content_type,
+                    user_id=user.id
+                )
+            except Exception as e:
+                logger.warning(f"Cloudflare R2 upload failed ({e}). Storing image via resilient fallback.")
+                b64_str = base64.b64encode(file_bytes).decode("utf-8")
+                avatar_url = f"data:{content_type};base64,{b64_str}"
+        else:
+            b64_str = base64.b64encode(file_bytes).decode("utf-8")
+            avatar_url = f"data:{content_type};base64,{b64_str}"
+
         user.avatar_url = avatar_url
         db.commit()
+        db.refresh(user)
         return avatar_url
+
+
 
     async def change_password(self, db: Session, user: User, current_password: str, new_password: str):
         """Authenticated password change with current password check."""
