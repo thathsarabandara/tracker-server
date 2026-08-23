@@ -35,7 +35,7 @@ class ForgotPasswordRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    email: EmailStr
+    email: Optional[EmailStr] = None
     otp: str
     newPassword: str = Field(..., min_length=8)
     confirmNewPassword: str = Field(..., min_length=8)
@@ -71,21 +71,24 @@ class Disable2faRequest(BaseModel):
     totpCode: str = Field(..., min_length=6, max_length=6)
 
 
+from pydantic import AliasChoices, BaseModel, EmailStr, Field
+
 # --- Common User DTO Response Schemas ---
 
 class UserDTO(BaseModel):
     id: str
     name: str
     email: str
-    avatarUrl: Optional[str] = None
+    avatarUrl: Optional[str] = Field(None, validation_alias=AliasChoices('avatarUrl', 'avatar_url'))
     tier: str = "Pro Architect"
-    jobTitle: Optional[str] = None
+    jobTitle: Optional[str] = Field(None, validation_alias=AliasChoices('jobTitle', 'job_title'))
     bio: Optional[str] = None
-    emailVerified: bool = False
-    is2faEnabled: bool = False
+    emailVerified: bool = Field(False, validation_alias=AliasChoices('emailVerified', 'is_email_verified'))
+    is2faEnabled: bool = Field(False, validation_alias=AliasChoices('is2faEnabled', 'is_2fa_enabled'))
 
     class Config:
         from_attributes = True
+
 
 
 class UserSessionDTO(BaseModel):
