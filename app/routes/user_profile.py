@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.config import get_db
@@ -14,6 +14,7 @@ from app.schemas import (
     UserDTO,
     UserSessionDTO
 )
+from app.services.storage_service import storage_service
 from app.services.user_service import user_service
 from app.utils.auth_utils import get_current_user
 from app.utils.helpers import success_response
@@ -72,7 +73,7 @@ async def upload_avatar(
             data={"avatarUrl": avatar_url_res},
             message="Avatar image uploaded successfully."
         )
-    elif avatar_url is not None:
+    elif avatar_url is not None and not avatar_url.startswith("blob:"):
         current_user.avatar_url = avatar_url
         db.commit()
         return success_response(
@@ -84,6 +85,20 @@ async def upload_avatar(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"code": "INVALID_AVATAR_PAYLOAD", "message": "Please select a valid image file to upload."}
         )
+
+
+@router.get("/avatar-file/{object_path:path}", summary="Get Avatar Image Directly From Cloudflare R2 Bucket")
+def get_avatar_file_from_r2(object_path: str):
+    """Retrieves and streams avatar image file directly from Cloudflare R2 bucket."""
+    try:
+        file_bytes, content_type = storage_service.get_file_bytes(object_path)
+        return Response(content=file_bytes, media_type=content_type)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "FILE_NOT_FOUND", "message": f"File '{object_path}' not found in Cloudflare R2 bucket."}
+        )
+
 
 
 @router.delete("/avatar", summary="Remove Avatar Picture")
