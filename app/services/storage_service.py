@@ -12,12 +12,25 @@ logger = logging.getLogger("pulse.storage")
 class StorageService:
     """Cloudflare R2 Object Storage Service utilizing boto3 S3-compatible client API."""
 
-    def __init__(self):
-        self.bucket_name = settings.R2_BUCKET_NAME
-        self.public_domain = settings.R2_PUBLIC_CUSTOM_DOMAIN
-        self.endpoint_url = settings.R2_RESOLVED_ENDPOINT_URL
-        self.access_key = settings.R2_ACCESS_KEY_ID
-        self.secret_key = settings.R2_SECRET_ACCESS_KEY
+    @property
+    def bucket_name(self) -> str:
+        return settings.R2_BUCKET_NAME
+
+    @property
+    def public_domain(self) -> Optional[str]:
+        return settings.R2_PUBLIC_CUSTOM_DOMAIN
+
+    @property
+    def endpoint_url(self) -> str:
+        return settings.R2_RESOLVED_ENDPOINT_URL
+
+    @property
+    def access_key(self) -> str:
+        return settings.R2_ACCESS_KEY_ID
+
+    @property
+    def secret_key(self) -> str:
+        return settings.R2_SECRET_ACCESS_KEY
 
     def _get_client(self):
         """Instantiate S3 client configured for Cloudflare R2 endpoint."""
@@ -43,11 +56,10 @@ class StorageService:
         file_obj: Union[BinaryIO, bytes],
         object_name: str,
         content_type: Optional[str] = "application/octet-stream"
-    ) -> Optional[str]:
+    ) -> str:
         """Upload file object or bytes to Cloudflare R2 bucket."""
         if not self.is_configured():
-            logger.info(f"[DEV FALLBACK] Cloudflare R2 credentials placeholder. Simulated upload for '{object_name}'.")
-            return self.get_public_url(object_name)
+            raise RuntimeError("Cloudflare R2 storage credentials are not configured.")
 
         try:
             client = self._get_client()
@@ -69,12 +81,10 @@ class StorageService:
                 )
             
             return self.get_public_url(object_name)
-        except (BotoCoreError, ClientError) as e:
+        except Exception as e:
             logger.error(f"Failed to upload file '{object_name}' to Cloudflare R2: {e}")
-            if settings.DEBUG:
-                logger.info(f"[DEV FALLBACK] Returning simulated public URL for '{object_name}' despite Cloudflare R2 error.")
-                return self.get_public_url(object_name)
-            raise e
+            raise RuntimeError(f"Cloudflare R2 upload failed: {e}")
+
 
     def upload_avatar(
         self,
@@ -124,14 +134,23 @@ class StorageService:
             logger.error(f"Failed to delete file '{object_name}' from Cloudflare R2: {e}")
             return True
 
+    def get_file_bytes(self, object_name: str) -> tuple:
+        """Fetch object bytes directly from Cloudflare R2 bucket."""
+        client = self._get_client()
+        response = client.get_object(Bucket=self.bucket_name, Key=object_name)
+        content_type = response.get("ContentType", "image/jpeg")
+        file_bytes = response["Body"].read()
+        return file_bytes, content_type
+
     def get_public_url(self, object_name: str) -> str:
-        """Get public URL for an object."""
+        """Get public URL for an object stored in R2 bucket."""
         if self.public_domain and "pub-<hash>" not in self.public_domain and "your_" not in self.public_domain:
             domain = self.public_domain.rstrip("/")
             return f"{domain}/{object_name.lstrip('/')}"
-        if self.endpoint_url and "your_cloudflare_account_id" not in self.endpoint_url:
-            return f"{self.endpoint_url}/{self.bucket_name}/{object_name.lstrip('/')}"
-        return f"https://pub-tracker.r2.dev/{object_name.lstrip('/')}"
+        
+        # Return R2 media streaming endpoint URL to serve file directly from bucket
+        return f"{settings.API_V1_PREFIX}/user/avatar-file/{object_name.lstrip('/')}"
 
 
 storage_service = StorageService()
+
