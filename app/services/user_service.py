@@ -153,9 +153,8 @@ class UserService:
             "user": {
                 "id": user.id,
                 "name": user.name,
-                "email": user.email,
                 "avatarUrl": user.avatar_url,
-                "tier": user.tier,
+                "jobTitle": user.job_title,
                 "emailVerified": user.is_email_verified,
                 "is2faEnabled": user.is_2fa_enabled
             }
@@ -262,7 +261,6 @@ class UserService:
                 "name": user.name,
                 "email": user.email,
                 "avatarUrl": user.avatar_url,
-                "tier": user.tier,
                 "jobTitle": user.job_title,
                 "bio": user.bio,
                 "emailVerified": user.is_email_verified,
@@ -413,8 +411,6 @@ class UserService:
             user.job_title = update_data["jobTitle"]
         if "bio" in update_data:
             user.bio = update_data["bio"]
-        if "tier" in update_data and update_data["tier"]:
-            user.tier = update_data["tier"]
 
         db.commit()
         db.refresh(user)
