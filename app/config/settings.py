@@ -82,11 +82,13 @@ class Settings(BaseSettings):
 
     @property
     def R2_RESOLVED_ENDPOINT_URL(self) -> str:
-        """Construct Cloudflare R2 endpoint URL if account ID is provided."""
-        if self.R2_ENDPOINT_URL:
+        """Construct Cloudflare R2 S3 API endpoint URL."""
+        if self.R2_ENDPOINT_URL and ".cloudflarestorage.com" in self.R2_ENDPOINT_URL:
             return self.R2_ENDPOINT_URL
         if self.R2_ACCOUNT_ID:
             return f"https://{self.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+        if self.R2_ENDPOINT_URL and not ".r2.dev" in self.R2_ENDPOINT_URL:
+            return self.R2_ENDPOINT_URL
         return ""
 
     model_config = SettingsConfigDict(
