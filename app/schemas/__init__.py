@@ -45,6 +45,7 @@ from app.schemas.project_schemas import (
     CreateTaskRequest,
     UpdateTaskStatusRequest,
     TaskDTO,
+    TaskSummaryDTO,
     CreateMilestoneInput,
     CreateMilestoneRequest,
     UpdateMilestoneRequest,

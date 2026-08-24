@@ -168,6 +168,36 @@ class ProjectService:
         self.recalculate_project_metrics(db, project)
         return project
 
+    def get_project_card_summary(self, db: Session, user_id: str, project_id: str) -> Project:
+        """Fetch lightweight top-level project card summary metadata."""
+        project = self.get_user_project_or_404(db, user_id, project_id)
+        self.recalculate_project_metrics(db, project)
+        return project
+
+    def get_project_milestones_summary(self, db: Session, user_id: str, project_id: str) -> List[ProjectMilestone]:
+        """Fetch project milestones without heavy task checklist details."""
+        project = self.get_user_project_or_404(db, user_id, project_id)
+        return db.query(ProjectMilestone).filter(
+            ProjectMilestone.project_id == project.id
+        ).order_by(ProjectMilestone.display_order).all()
+
+    def get_task_checklist(self, db: Session, user_id: str, project_id: str, task_id: str) -> List[TaskChecklistItem]:
+        """Lazy fetch micro-checklist items for a project task."""
+        project = self.get_user_project_or_404(db, user_id, project_id)
+        task = db.query(ProjectTask).filter(
+            ProjectTask.id == task_id,
+            ProjectTask.project_id == project.id
+        ).first()
+
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"code": "TASK_NOT_FOUND", "message": "Project task not found."}
+            )
+        return db.query(TaskChecklistItem).filter(
+            TaskChecklistItem.task_id == task.id
+        ).order_by(TaskChecklistItem.display_order).all()
+
     def update_project_metadata(self, db: Session, user_id: str, project_id: str, request_data: UpdateProjectMetadataRequest) -> Project:
         project = self.get_user_project_or_404(db, user_id, project_id)
         if request_data.title is not None:

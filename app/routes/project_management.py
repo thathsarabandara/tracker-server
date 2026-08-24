@@ -82,6 +82,43 @@ def get_project_detail(
     return success_response(data=dto, message="Project details retrieved successfully.")
 
 
+@router.get("/{id}/card", summary="Get Project Card Summary (Lightweight)")
+def get_project_card_summary(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Fetches lightweight top-level card summary details for a project without nested milestones/tasks."""
+    project = project_service.get_project_card_summary(db=db, user_id=current_user.id, project_id=id)
+    dto = ProjectSummaryDTO.model_validate(project).model_dump()
+    return success_response(data=dto, message="Project card summary retrieved successfully.")
+
+
+@router.get("/{id}/milestones", summary="Get Project Milestones List (Non-Detailed)")
+def get_project_milestones(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Fetches project milestones list without heavy task micro-checklist arrays."""
+    milestones = project_service.get_project_milestones_summary(db=db, user_id=current_user.id, project_id=id)
+    dtos = [MilestoneDTO.model_validate(m).model_dump() for m in milestones]
+    return success_response(data=dtos, message="Project milestones retrieved successfully.", count=len(dtos))
+
+
+@router.get("/{id}/tasks/{task_id}/checklist", summary="Get Task Micro-Checklist Items (Lazy Loaded)")
+def get_task_checklist(
+    id: str,
+    task_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Lazy fetches micro-checklist items when expanding a collapsible task row/card."""
+    items = project_service.get_task_checklist(db=db, user_id=current_user.id, project_id=id, task_id=task_id)
+    dtos = [ChecklistItemDTO.model_validate(item).model_dump() for item in items]
+    return success_response(data=dtos, message="Task checklist items retrieved successfully.", count=len(dtos))
+
+
 @router.put("/{id}", summary="Update Project Metadata")
 def update_project_metadata(
     id: str,

@@ -65,6 +65,24 @@ class UpdateTaskStatusRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class TaskSummaryDTO(BaseModel):
+    id: str
+    projectId: Optional[str] = Field(None, alias="project_id")
+    milestoneId: Optional[str] = Field(None, alias="milestone_id")
+    title: str
+    description: Optional[str] = None
+    status: str = "todo"
+    priority: str = "medium"
+    estHours: float = Field(0.0, alias="est_hours")
+    spentHours: float = Field(0.0, alias="spent_hours")
+    dueDate: Optional[datetime] = Field(None, alias="due_date")
+    displayOrder: int = Field(0, alias="display_order")
+    checklistCount: int = Field(0, alias="checklist_count")
+    completedChecklistCount: int = Field(0, alias="completed_checklist_count")
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+
 class TaskDTO(BaseModel):
     id: str
     projectId: Optional[str] = Field(None, alias="project_id")
