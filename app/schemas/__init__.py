@@ -31,6 +31,7 @@ from app.schemas.learning_schemas import (
     CreateSessionLogRequest,
     LearningTopicSummaryDTO,
     LearningTopicDetailDTO,
+    LearningSubtopicSummaryDTO,
     LearningSubtopicDTO,
     SubtopicChecklistItemDTO,
     LearningSessionLogDTO

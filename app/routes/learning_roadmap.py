@@ -10,6 +10,7 @@ from app.schemas import (
     CreateSessionLogRequest,
     LearningSessionLogDTO,
     LearningSubtopicDTO,
+    LearningSubtopicSummaryDTO,
     LearningTopicDetailDTO,
     LearningTopicSummaryDTO,
     RawJsonPayloadRequest,
@@ -63,6 +64,30 @@ def get_roadmap_detail(
     topic = learning_service.get_roadmap_detail(db=db, topic_id=id, user_id=current_user.id)
     topic_detail_dto = LearningTopicDetailDTO.model_validate(topic).model_dump()
     return success_response(data=topic_detail_dto, message="Roadmap details retrieved successfully.")
+
+
+@router.get("/{id}/card", summary="Get Roadmap Card Summary (Lightweight)")
+def get_roadmap_card_summary(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Fetches lightweight top-level card summary details for a roadmap topic without subtopics/checklists."""
+    topic = learning_service.get_roadmap_card_summary(db=db, topic_id=id, user_id=current_user.id)
+    topic_dto = LearningTopicSummaryDTO.model_validate(topic).model_dump()
+    return success_response(data=topic_dto, message="Roadmap card summary retrieved successfully.")
+
+
+@router.get("/{id}/subtopics", summary="Get Roadmap Subtopics List (Non-Detailed)")
+def get_roadmap_subtopics(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Fetches subtopics list with checklist counts without loading heavy nested micro-checklist items."""
+    subtopics = learning_service.get_subtopics_summary(db=db, topic_id=id, user_id=current_user.id)
+    subtopics_dto = [LearningSubtopicSummaryDTO.model_validate(s).model_dump() for s in subtopics]
+    return success_response(data=subtopics_dto, message="Roadmap subtopics retrieved successfully.", count=len(subtopics_dto))
 
 
 @router.put("/{id}", summary="Visual Edit Roadmap Metadata")
@@ -170,6 +195,19 @@ def delete_subtopic(
 # ==========================================
 # 📌 3. MICRO-CHECKLIST TASK ENDPOINTS
 # ==========================================
+
+@router.get("/{id}/subtopics/{subtopic_id}/checklist", summary="Get Subtopic Micro-Checklist Items (Lazy Loaded)")
+def get_subtopic_checklist(
+    id: str,
+    subtopic_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Lazy fetches micro-checklist items when expanding a collapsible subtopic card."""
+    items = learning_service.get_subtopic_checklist(db=db, topic_id=id, subtopic_id=subtopic_id, user_id=current_user.id)
+    items_dto = [SubtopicChecklistItemDTO.model_validate(item).model_dump() for item in items]
+    return success_response(data=items_dto, message="Subtopic checklist items retrieved successfully.", count=len(items_dto))
+
 
 @router.post("/{id}/subtopics/{subtopic_id}/checklist", status_code=status.HTTP_201_CREATED, summary="Add Micro-Checklist Task Item")
 def add_checklist_item(

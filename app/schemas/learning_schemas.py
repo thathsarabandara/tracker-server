@@ -70,6 +70,21 @@ class SubtopicChecklistItemDTO(BaseModel):
         from_attributes = True
 
 
+class LearningSubtopicSummaryDTO(BaseModel):
+    id: str
+    topicId: str = Field(..., validation_alias=AliasChoices('topicId', 'topic_id'))
+    title: str
+    description: Optional[str] = None
+    estMinutes: int = Field(30, validation_alias=AliasChoices('estMinutes', 'est_minutes'))
+    completed: bool = False
+    displayOrder: int = Field(0, validation_alias=AliasChoices('displayOrder', 'display_order'))
+    checklistCount: int = Field(0, validation_alias=AliasChoices('checklistCount', 'checklist_count'))
+    completedChecklistCount: int = Field(0, validation_alias=AliasChoices('completedChecklistCount', 'completed_checklist_count'))
+
+    class Config:
+        from_attributes = True
+
+
 class LearningSubtopicDTO(BaseModel):
     id: str
     topicId: str = Field(..., validation_alias=AliasChoices('topicId', 'topic_id'))

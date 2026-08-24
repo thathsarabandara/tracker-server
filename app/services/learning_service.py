@@ -148,6 +148,42 @@ class LearningService:
         topic = self._get_topic_for_user(db, topic_id, user_id)
         return topic
 
+    def get_roadmap_card_summary(self, db: Session, topic_id: str, user_id: str) -> LearningTopic:
+        """Fetch top-level card summary metadata for a topic."""
+        return self._get_topic_for_user(db, topic_id, user_id)
+
+    def get_subtopics_summary(self, db: Session, topic_id: str, user_id: str) -> List[Dict[str, Any]]:
+        """Fetch list of subtopic modules for a roadmap with checklist item counts."""
+        topic = self._get_topic_for_user(db, topic_id, user_id)
+        subtopics = db.query(LearningSubtopic).filter(
+            LearningSubtopic.topic_id == topic.id
+        ).order_by(LearningSubtopic.display_order).all()
+
+        result = []
+        for s in subtopics:
+            items = s.checklist_items
+            checklist_count = len(items)
+            completed_checklist_count = sum(1 for item in items if item.completed)
+            result.append({
+                "id": s.id,
+                "topic_id": s.topic_id,
+                "title": s.title,
+                "description": s.description,
+                "est_minutes": s.est_minutes,
+                "completed": s.completed,
+                "display_order": s.display_order,
+                "checklist_count": checklist_count,
+                "completed_checklist_count": completed_checklist_count,
+            })
+        return result
+
+    def get_subtopic_checklist(self, db: Session, topic_id: str, subtopic_id: str, user_id: str) -> List[SubtopicChecklistItem]:
+        """Lazy fetch micro-checklist items for a collapsible subtopic."""
+        subtopic = self._get_subtopic_for_user(db, topic_id, subtopic_id, user_id)
+        return db.query(SubtopicChecklistItem).filter(
+            SubtopicChecklistItem.subtopic_id == subtopic.id
+        ).order_by(SubtopicChecklistItem.display_order).all()
+
     def update_roadmap(self, db: Session, topic_id: str, user_id: str, request_data: UpdateRoadmapRequest) -> LearningTopic:
         """Visual Edit roadmap metadata (title, category, icon)."""
         topic = self._get_topic_for_user(db, topic_id, user_id)
