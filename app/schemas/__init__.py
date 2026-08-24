@@ -35,6 +35,30 @@ from app.schemas.learning_schemas import (
     SubtopicChecklistItemDTO,
     LearningSessionLogDTO
 )
+from app.schemas.project_schemas import (
+    CreateChecklistItemInput,
+    CreateChecklistItemRequest as CreateProjectChecklistItemRequest,
+    UpdateChecklistItemRequest as UpdateProjectChecklistItemRequest,
+    ChecklistItemDTO as ProjectChecklistItemDTO,
+    CreateTaskInput,
+    CreateTaskRequest,
+    UpdateTaskStatusRequest,
+    TaskDTO,
+    CreateMilestoneInput,
+    CreateMilestoneRequest,
+    UpdateMilestoneRequest,
+    MilestoneDTO,
+    CreateTimeLogRequest as CreateProjectTimeLogRequest,
+    TimeLogDTO as ProjectTimeLogDTO,
+    CreateAttachmentRequest,
+    AttachmentDTO,
+    CreateProjectRequest,
+    UpdateProjectMetadataRequest,
+    ProjectSummaryDTO,
+    ProjectDetailDTO,
+    ProjectAnalyticsDTO,
+    RawJsonPayloadRequest as ProjectRawJsonPayloadRequest
+)
 
 __all__ = [
     "RegisterRequest",
@@ -66,5 +90,28 @@ __all__ = [
     "LearningTopicDetailDTO",
     "LearningSubtopicDTO",
     "SubtopicChecklistItemDTO",
-    "LearningSessionLogDTO"
+    "LearningSessionLogDTO",
+    "CreateChecklistItemInput",
+    "CreateProjectChecklistItemRequest",
+    "UpdateProjectChecklistItemRequest",
+    "ProjectChecklistItemDTO",
+    "CreateTaskInput",
+    "CreateTaskRequest",
+    "UpdateTaskStatusRequest",
+    "TaskDTO",
+    "CreateMilestoneInput",
+    "CreateMilestoneRequest",
+    "UpdateMilestoneRequest",
+    "MilestoneDTO",
+    "CreateProjectTimeLogRequest",
+    "ProjectTimeLogDTO",
+    "CreateAttachmentRequest",
+    "AttachmentDTO",
+    "CreateProjectRequest",
+    "UpdateProjectMetadataRequest",
+    "ProjectSummaryDTO",
+    "ProjectDetailDTO",
+    "ProjectAnalyticsDTO",
+    "ProjectRawJsonPayloadRequest"
 ]
+
