@@ -10,7 +10,8 @@ from app.routes import (
     auth_router,
     health_router,
     user_profile_router,
-    learning_router
+    learning_router,
+    project_router
 )
 
 from app.utils.exception_handlers import (
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
     app.include_router(user_profile_router, prefix=settings.API_V1_PREFIX)
     app.include_router(learning_router, prefix=settings.API_V1_PREFIX)
+    app.include_router(project_router, prefix=settings.API_V1_PREFIX)
 
     @app.get("/", tags=["Root"])
     def root():
