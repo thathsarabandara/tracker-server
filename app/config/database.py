@@ -27,7 +27,11 @@ def init_db():
     """Auto-create all SQL tables on server startup."""
     try:
         # Import models so Base registered all schemas
-        from app.models import User, OtpVerification, RefreshToken, UserSession, TwoFactorRecoveryCode  # noqa
+        from app.models import (  # noqa
+            User, OtpVerification, RefreshToken, UserSession, TwoFactorRecoveryCode,
+            LearningTopic, LearningSubtopic, SubtopicChecklistItem, LearningSessionLog,
+            Project, ProjectMilestone, ProjectTask, TaskChecklistItem, ProjectTimeLog, ProjectAttachment
+        )
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables initialized successfully.")
     except Exception as e:

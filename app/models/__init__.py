@@ -7,6 +7,12 @@ from app.models.learning_topic import LearningTopic
 from app.models.learning_subtopic import LearningSubtopic
 from app.models.subtopic_checklist_item import SubtopicChecklistItem
 from app.models.learning_session_log import LearningSessionLog
+from app.models.project import Project
+from app.models.project_milestone import ProjectMilestone
+from app.models.project_task import ProjectTask
+from app.models.task_checklist_item import TaskChecklistItem
+from app.models.project_time_log import ProjectTimeLog
+from app.models.project_attachment import ProjectAttachment
 
 __all__ = [
     "User",
@@ -17,5 +23,12 @@ __all__ = [
     "LearningTopic",
     "LearningSubtopic",
     "SubtopicChecklistItem",
-    "LearningSessionLog"
+    "LearningSessionLog",
+    "Project",
+    "ProjectMilestone",
+    "ProjectTask",
+    "TaskChecklistItem",
+    "ProjectTimeLog",
+    "ProjectAttachment"
 ]
+
