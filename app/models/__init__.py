@@ -13,6 +13,11 @@ from app.models.project_task import ProjectTask
 from app.models.task_checklist_item import TaskChecklistItem
 from app.models.project_time_log import ProjectTimeLog
 from app.models.project_attachment import ProjectAttachment
+from app.models.daily_schedule import DailySchedule
+from app.models.schedule_time_block import ScheduleTimeBlock
+from app.models.time_block_checklist_item import TimeBlockChecklistItem
+from app.models.daily_routine_item import DailyRoutineItem
+from app.models.daily_reflection import DailyReflection
 
 __all__ = [
     "User",
@@ -29,6 +34,12 @@ __all__ = [
     "ProjectTask",
     "TaskChecklistItem",
     "ProjectTimeLog",
-    "ProjectAttachment"
+    "ProjectAttachment",
+    "DailySchedule",
+    "ScheduleTimeBlock",
+    "TimeBlockChecklistItem",
+    "DailyRoutineItem",
+    "DailyReflection"
 ]
+
 

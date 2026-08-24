@@ -30,7 +30,8 @@ def init_db():
         from app.models import (  # noqa
             User, OtpVerification, RefreshToken, UserSession, TwoFactorRecoveryCode,
             LearningTopic, LearningSubtopic, SubtopicChecklistItem, LearningSessionLog,
-            Project, ProjectMilestone, ProjectTask, TaskChecklistItem, ProjectTimeLog, ProjectAttachment
+            Project, ProjectMilestone, ProjectTask, TaskChecklistItem, ProjectTimeLog, ProjectAttachment,
+            DailySchedule, ScheduleTimeBlock, TimeBlockChecklistItem, DailyRoutineItem, DailyReflection
         )
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables initialized successfully.")
