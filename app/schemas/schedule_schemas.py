@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 # ==========================================
@@ -62,12 +62,12 @@ class TimeBlockDTO(BaseModel):
     color: str = "#6366F1"
     startTime: str = Field(..., alias="start_time")
     endTime: str = Field(..., alias="end_time")
-    durationMinutes: int = Field(30, alias="duration_minutes")
+    durationMinutes: Optional[int] = Field(30, alias="duration_minutes")
     status: str = "planned"
-    isCarryForward: bool = Field(False, alias="is_carry_forward")
+    isCarryForward: Optional[bool] = Field(False, alias="is_carry_forward")
     linkedTopicId: Optional[str] = Field(None, alias="linked_topic_id")
     linkedTaskId: Optional[str] = Field(None, alias="linked_task_id")
-    displayOrder: int = Field(0, alias="display_order")
+    displayOrder: Optional[int] = Field(0, alias="display_order")
     checklist: List[TimeBlockChecklistItemDTO] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
@@ -91,7 +91,7 @@ class RoutineItemDTO(BaseModel):
     title: str
     routineType: str = Field("morning", alias="routine_type")
     completed: bool = False
-    displayOrder: int = Field(0, alias="display_order")
+    displayOrder: Optional[int] = Field(0, alias="display_order")
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -113,7 +113,7 @@ class DailyReflectionDTO(BaseModel):
     id: str
     scheduleId: str = Field(..., alias="schedule_id")
     userId: str = Field(..., alias="user_id")
-    dayRating: int = Field(5, alias="day_rating")
+    dayRating: Optional[int] = Field(5, alias="day_rating")
     winsNotes: Optional[str] = Field(None, alias="wins_notes")
     blockersNotes: Optional[str] = Field(None, alias="blockers_notes")
     generalNotes: Optional[str] = Field(None, alias="general_notes")
@@ -138,15 +138,15 @@ class UpdateScheduleMetadataRequest(BaseModel):
 class DailyScheduleDTO(BaseModel):
     id: str
     userId: str = Field(..., alias="user_id")
-    scheduleDate: str = Field(..., alias="schedule_date")
-    status: str = "active"
-    moodScore: int = Field(3, alias="mood_score")
-    energyLevel: int = Field(3, alias="energy_level")
-    focusGoalMinutes: int = Field(180, alias="focus_goal_minutes")
-    completedFocusMinutes: int = Field(0, alias="completed_focus_minutes")
-    totalScheduledMinutes: int = Field(0, alias="total_scheduled_minutes")
-    scheduleProgress: int = Field(0, alias="schedule_progress")
-    routineProgress: int = Field(0, alias="routine_progress")
+    scheduleDate: Union[date, str] = Field(..., alias="schedule_date")
+    status: Optional[str] = "active"
+    moodScore: Optional[int] = Field(3, alias="mood_score")
+    energyLevel: Optional[int] = Field(3, alias="energy_level")
+    focusGoalMinutes: Optional[int] = Field(180, alias="focus_goal_minutes")
+    completedFocusMinutes: Optional[int] = Field(0, alias="completed_focus_minutes")
+    totalScheduledMinutes: Optional[int] = Field(0, alias="total_scheduled_minutes")
+    scheduleProgress: Optional[int] = Field(0, alias="schedule_progress")
+    routineProgress: Optional[int] = Field(0, alias="routine_progress")
     timeBlocks: List[TimeBlockDTO] = Field(default_factory=list, alias="blocks")
     routines: List[RoutineItemDTO] = Field(default_factory=list)
     reflection: Optional[DailyReflectionDTO] = None
@@ -154,6 +154,12 @@ class DailyScheduleDTO(BaseModel):
     updatedAt: Optional[datetime] = Field(None, alias="updated_at")
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    @field_serializer("scheduleDate")
+    def serialize_schedule_date(self, val: Union[date, str], _info) -> str:
+        if isinstance(val, date):
+            return val.isoformat()
+        return str(val)
 
 
 # ==========================================
