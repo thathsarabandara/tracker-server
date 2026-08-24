@@ -60,6 +60,22 @@ from app.schemas.project_schemas import (
     RawJsonPayloadRequest as ProjectRawJsonPayloadRequest
 )
 
+from app.schemas.schedule_schemas import (
+    CreateTimeBlockChecklistItemInput,
+    TimeBlockChecklistItemDTO,
+    CreateTimeBlockRequest,
+    UpdateBlockStatusRequest,
+    TimeBlockDTO,
+    CreateRoutineItemRequest,
+    RoutineItemDTO,
+    SaveReflectionRequest,
+    DailyReflectionDTO,
+    UpdateScheduleMetadataRequest,
+    DailyScheduleDTO,
+    WeeklyScheduleAnalyticsDTO,
+    RawScheduleJsonPayloadRequest
+)
+
 __all__ = [
     "RegisterRequest",
     "VerifyOtpRequest",
@@ -112,6 +128,20 @@ __all__ = [
     "ProjectSummaryDTO",
     "ProjectDetailDTO",
     "ProjectAnalyticsDTO",
-    "ProjectRawJsonPayloadRequest"
+    "ProjectRawJsonPayloadRequest",
+    "CreateTimeBlockChecklistItemInput",
+    "TimeBlockChecklistItemDTO",
+    "CreateTimeBlockRequest",
+    "UpdateBlockStatusRequest",
+    "TimeBlockDTO",
+    "CreateRoutineItemRequest",
+    "RoutineItemDTO",
+    "SaveReflectionRequest",
+    "DailyReflectionDTO",
+    "UpdateScheduleMetadataRequest",
+    "DailyScheduleDTO",
+    "WeeklyScheduleAnalyticsDTO",
+    "RawScheduleJsonPayloadRequest"
 ]
+
 
