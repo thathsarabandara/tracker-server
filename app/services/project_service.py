@@ -130,8 +130,11 @@ class ProjectService:
         if request_data.tasks:
             for idx, task_input in enumerate(request_data.tasks):
                 milestone_id = task_input.milestoneId
-                if not milestone_id and task_input.title in milestone_map:
-                    milestone_id = milestone_map[task_input.title]
+                if not milestone_id:
+                    if task_input.milestoneTitle and task_input.milestoneTitle in milestone_map:
+                        milestone_id = milestone_map[task_input.milestoneTitle]
+                    elif task_input.title in milestone_map:
+                        milestone_id = milestone_map[task_input.title]
 
                 task = ProjectTask(
                     project_id=project.id,

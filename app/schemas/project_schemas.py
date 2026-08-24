@@ -44,6 +44,7 @@ class CreateTaskInput(BaseModel):
     title: str = Field(..., example="Implement API Spec")
     description: Optional[str] = Field(None, example="Draft full REST endpoint")
     milestoneId: Optional[str] = Field(None, alias="milestone_id")
+    milestoneTitle: Optional[str] = Field(None, alias="milestone_title")
     status: Optional[str] = Field("todo", example="todo")  # backlog, todo, in_progress, in_review, completed
     priority: Optional[str] = Field("medium", example="high")  # low, medium, high, urgent
     estHours: Optional[float] = Field(1.0, alias="est_hours", example=8.0)
