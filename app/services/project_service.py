@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     Project,
@@ -153,7 +153,7 @@ class ProjectService:
                 if task_input.checklist:
                     for chk_idx, chk_item in enumerate(task_input.checklist):
                         chk_title = chk_item if isinstance(chk_item, str) else chk_item.title
-                        chk_order = chk_idx if isinstance(chk_item, str) else (chk_item.displayOrder or chk_idx)
+                        chk_order = chk_idx if isinstance(chk_item, str) else (chk_item.displayOrder if chk_item.displayOrder is not None else chk_idx)
                         item = TaskChecklistItem(
                             task_id=task.id,
                             title=chk_title,
@@ -167,15 +167,32 @@ class ProjectService:
         return project
 
     def get_project_detail(self, db: Session, user_id: str, project_id: str) -> Project:
-        project = self.get_user_project_or_404(db, user_id, project_id)
-        self.recalculate_project_metrics(db, project)
+        project = db.query(Project).options(
+            selectinload(Project.milestones),
+            selectinload(Project.tasks).selectinload(ProjectTask.checklist),
+            selectinload(Project.time_logs),
+            selectinload(Project.attachments)
+        ).filter(Project.id == project_id, Project.user_id == user_id).first()
+
+        if not project:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"code": "PROJECT_NOT_FOUND", "message": "The requested project ID does not exist or does not belong to you."}
+            )
+
+        if project.milestones:
+            project.milestones.sort(key=lambda m: (m.display_order if m.display_order is not None else 0, m.created_at or datetime.min))
+        if project.tasks:
+            project.tasks.sort(key=lambda t: (t.display_order if t.display_order is not None else 0, t.created_at or datetime.min))
+            for task in project.tasks:
+                if task.checklist:
+                    task.checklist.sort(key=lambda c: (c.display_order if c.display_order is not None else 0, c.created_at or datetime.min))
+
         return project
 
     def get_project_card_summary(self, db: Session, user_id: str, project_id: str) -> Project:
         """Fetch lightweight top-level project card summary metadata."""
-        project = self.get_user_project_or_404(db, user_id, project_id)
-        self.recalculate_project_metrics(db, project)
-        return project
+        return self.get_user_project_or_404(db, user_id, project_id)
 
     def get_project_milestones_summary(self, db: Session, user_id: str, project_id: str) -> List[ProjectMilestone]:
         """Fetch project milestones without heavy task checklist details."""

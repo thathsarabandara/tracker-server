@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     LearningSessionLog,
@@ -105,13 +105,14 @@ class LearningService:
 
         if request_data.subtopics:
             for idx, sub_req in enumerate(request_data.subtopics):
+                sub_order = sub_req.displayOrder if (hasattr(sub_req, "displayOrder") and sub_req.displayOrder is not None) else idx
                 subtopic = LearningSubtopic(
                     topic_id=topic.id,
                     title=sub_req.title,
                     description=sub_req.description,
                     est_minutes=sub_req.estMinutes or 30,
                     completed=False,
-                    display_order=idx
+                    display_order=sub_order
                 )
                 db.add(subtopic)
                 db.flush()
@@ -120,12 +121,16 @@ class LearningService:
                     for c_idx, chk_item in enumerate(sub_req.checklist):
                         if isinstance(chk_item, str):
                             chk_title = chk_item
+                            chk_order = c_idx
                         elif isinstance(chk_item, dict):
                             chk_title = chk_item.get("title", "")
+                            chk_order = chk_item.get("displayOrder") if chk_item.get("displayOrder") is not None else c_idx
                         elif hasattr(chk_item, "title"):
                             chk_title = chk_item.title
+                            chk_order = getattr(chk_item, "displayOrder", None) if getattr(chk_item, "displayOrder", None) is not None else c_idx
                         else:
                             chk_title = str(chk_item)
+                            chk_order = c_idx
 
                         if not chk_title:
                             continue
@@ -134,7 +139,7 @@ class LearningService:
                             subtopic_id=subtopic.id,
                             title=chk_title,
                             completed=False,
-                            display_order=c_idx
+                            display_order=chk_order
                         )
                         db.add(checklist_record)
 
@@ -145,7 +150,26 @@ class LearningService:
 
     def get_roadmap_detail(self, db: Session, topic_id: str, user_id: str) -> LearningTopic:
         """Get detailed inner roadmap content, subtopics, micro-checklists, and session logs."""
-        topic = self._get_topic_for_user(db, topic_id, user_id)
+        topic = db.query(LearningTopic).options(
+            selectinload(LearningTopic.subtopics).selectinload(LearningSubtopic.checklist_items),
+            selectinload(LearningTopic.session_logs)
+        ).filter(
+            LearningTopic.id == topic_id,
+            LearningTopic.user_id == user_id
+        ).first()
+
+        if not topic:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"code": "ROADMAP_NOT_FOUND", "message": "Learning roadmap not found or access denied."}
+            )
+
+        if topic.subtopics:
+            topic.subtopics.sort(key=lambda s: (s.display_order if s.display_order is not None else 0, s.created_at or datetime.min))
+            for sub in topic.subtopics:
+                if sub.checklist_items:
+                    sub.checklist_items.sort(key=lambda c: (c.display_order if c.display_order is not None else 0, c.created_at or datetime.min))
+
         return topic
 
     def get_roadmap_card_summary(self, db: Session, topic_id: str, user_id: str) -> LearningTopic:
@@ -155,7 +179,9 @@ class LearningService:
     def get_subtopics_summary(self, db: Session, topic_id: str, user_id: str) -> List[Dict[str, Any]]:
         """Fetch list of subtopic modules for a roadmap with checklist item counts."""
         topic = self._get_topic_for_user(db, topic_id, user_id)
-        subtopics = db.query(LearningSubtopic).filter(
+        subtopics = db.query(LearningSubtopic).options(
+            selectinload(LearningSubtopic.checklist_items)
+        ).filter(
             LearningSubtopic.topic_id == topic.id
         ).order_by(LearningSubtopic.display_order).all()
 

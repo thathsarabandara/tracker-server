@@ -9,14 +9,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class CreateChecklistItemInput(BaseModel):
     title: str = Field(..., example="Verify responsive layout")
-    displayOrder: Optional[int] = Field(0, alias="display_order")
+    displayOrder: Optional[int] = Field(None, alias="display_order")
 
     model_config = ConfigDict(populate_by_name=True)
 
 
 class CreateChecklistItemRequest(BaseModel):
     title: str = Field(..., example="Verify responsive layout")
-    displayOrder: Optional[int] = Field(0, alias="display_order")
+    displayOrder: Optional[int] = Field(None, alias="display_order")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -49,7 +49,7 @@ class CreateTaskInput(BaseModel):
     priority: Optional[str] = Field("medium", example="high")  # low, medium, high, urgent
     estHours: Optional[float] = Field(1.0, alias="est_hours", example=8.0)
     dueDate: Optional[datetime] = Field(None, alias="due_date")
-    displayOrder: Optional[int] = Field(0, alias="display_order")
+    displayOrder: Optional[int] = Field(None, alias="display_order")
     checklist: Optional[List[Union[str, CreateChecklistItemInput]]] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
@@ -110,7 +110,7 @@ class CreateMilestoneInput(BaseModel):
     description: Optional[str] = Field(None, example="Initial public release")
     status: Optional[str] = Field("pending", example="pending")  # pending, in_progress, completed
     targetDate: Optional[datetime] = Field(None, alias="target_date")
-    displayOrder: Optional[int] = Field(0, alias="display_order")
+    displayOrder: Optional[int] = Field(None, alias="display_order")
 
     model_config = ConfigDict(populate_by_name=True)
 

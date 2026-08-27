@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     DailyReflection,
@@ -71,7 +71,11 @@ class ScheduleService:
 
     def get_or_create_today_schedule(self, db: Session, user_id: str) -> DailySchedule:
         today_date = date.today()
-        schedule = db.query(DailySchedule).filter(
+        schedule = db.query(DailySchedule).options(
+            selectinload(DailySchedule.blocks).selectinload(ScheduleTimeBlock.checklist),
+            selectinload(DailySchedule.routines),
+            selectinload(DailySchedule.reflection)
+        ).filter(
             DailySchedule.user_id == user_id,
             DailySchedule.schedule_date == today_date
         ).first()
@@ -147,12 +151,24 @@ class ScheduleService:
 
             db.commit()
             db.refresh(schedule)
+            self.recalculate_schedule_metrics(db, schedule)
+            # Re-fetch with eager loading
+            return db.query(DailySchedule).options(
+                selectinload(DailySchedule.blocks).selectinload(ScheduleTimeBlock.checklist),
+                selectinload(DailySchedule.routines),
+                selectinload(DailySchedule.reflection)
+            ).filter(
+                DailySchedule.id == schedule.id
+            ).first()
 
-        self.recalculate_schedule_metrics(db, schedule)
         return schedule
 
     def get_schedule_by_date(self, db: Session, user_id: str, schedule_date: date) -> DailySchedule:
-        schedule = db.query(DailySchedule).filter(
+        schedule = db.query(DailySchedule).options(
+            selectinload(DailySchedule.blocks).selectinload(ScheduleTimeBlock.checklist),
+            selectinload(DailySchedule.routines),
+            selectinload(DailySchedule.reflection)
+        ).filter(
             DailySchedule.user_id == user_id,
             DailySchedule.schedule_date == schedule_date
         ).first()
@@ -167,8 +183,14 @@ class ScheduleService:
             db.add(schedule)
             db.commit()
             db.refresh(schedule)
+            return db.query(DailySchedule).options(
+                selectinload(DailySchedule.blocks).selectinload(ScheduleTimeBlock.checklist),
+                selectinload(DailySchedule.routines),
+                selectinload(DailySchedule.reflection)
+            ).filter(
+                DailySchedule.id == schedule.id
+            ).first()
 
-        self.recalculate_schedule_metrics(db, schedule)
         return schedule
 
     def update_schedule_metadata(self, db: Session, user_id: str, schedule_id: str, request_data: UpdateScheduleMetadataRequest) -> DailySchedule:
